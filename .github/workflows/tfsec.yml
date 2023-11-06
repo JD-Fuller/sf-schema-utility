@@ -1,0 +1,4 @@
+- name: tfsec Security Check
+  run: |
+    pip install tfsec
+    tfsec .
