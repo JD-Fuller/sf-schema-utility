@@ -1,4 +1,17 @@
-- name: tfsec Security Check
-  run: |
-    pip install tfsec
-    tfsec .
+name: tfsec Security Check
+
+on: [push]
+
+jobs:
+  tfsec:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x' # or any specific version you need
+    - name: Install tfsec
+      run: pip install tfsec
+    - name: Run tfsec
+      run: tfsec .
