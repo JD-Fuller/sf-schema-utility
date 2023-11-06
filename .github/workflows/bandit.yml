@@ -1,4 +1,17 @@
-- name: Bandit Security Check
-  run: |
-    pip install bandit
-    bandit -r $(git ls-files '*.py')
+name: Bandit Security Check
+
+on: [push]
+
+jobs:
+  bandit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.x' # or any specific version you need
+    - name: Install Bandit
+      run: pip install bandit
+    - name: Run Bandit
+      run: bandit -r $(git ls-files '*.py')
