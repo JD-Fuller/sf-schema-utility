@@ -1,0 +1,4 @@
+- name: Bandit Security Check
+  run: |
+    pip install bandit
+    bandit -r $(git ls-files '*.py')
