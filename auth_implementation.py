@@ -10,16 +10,14 @@ def authenticate_using_username_password():
         username = creds.get('username')
         password = creds.get('password')
         security_token = creds.get('security_token')
-        client_id = creds.get('client_id')  # Only needed for connected app auth
-        client_secret = creds.get('client_secret')  # Only needed for connected app auth
         base_path = creds.get('base_path', 'https://login.salesforce.com')  # Default to standard login URL
 
-        if not all([username, password, security_token, client_id, client_secret]):
+        if not all([username, password, security_token]):
             print("Error: Missing required credentials.")
             return
 
         # Create a configuration object
-        config = AuthConfig(client_id, client_secret, username, password, security_token, base_path)
+        config = AuthConfig(username, password, security_token, base_path)
 
         # Create an authentication object
         sf_auth = SfAuth()
