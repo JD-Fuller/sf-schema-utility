@@ -1,0 +1,19 @@
+{
+  "client": {
+    "dev": {
+      "username": "dev_username",
+      "password": "dev_password",
+      "security_token": "dev_security_token"
+    },
+    "qa_uat": {
+      "username": "qa_username",
+      "password": "qa_password",
+      "security_token": "qa_security_token"
+    },
+    "prod": {
+      "username": "prod_username",
+      "password": "prod_password",
+      "security_token": "prod_security_token"
+    }
+  }
+}
