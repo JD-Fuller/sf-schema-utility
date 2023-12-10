@@ -5,6 +5,10 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import InvalidKey, InvalidSignature
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 class CryptoUtils:
     def __init__(self):
@@ -12,7 +16,7 @@ class CryptoUtils:
         try:
             self.private_key, self.public_key = self.generate_rsa_key_pair()
         except Exception as e:
-            print("Error generating RSA key pair:", e)
+            logging.error("Error generating RSA key pair: %s", e)
             self.private_key, self.public_key = None, None
 
     def generate_rsa_key_pair(self):
@@ -42,7 +46,7 @@ class CryptoUtils:
             )
             return encrypted
         except Exception as e:
-            print("Encryption error:", e)
+            logging.error("Encryption error: %s", e)
             return None
 
     def decrypt_data(self, encrypted_data):
@@ -58,7 +62,7 @@ class CryptoUtils:
             )
             return decrypted.decode()
         except Exception as e:
-            print("Decryption error:", e)
+            logging.error("Decryption error: %s", e)
             return None
 
 # Example usage
@@ -73,6 +77,6 @@ if __name__ == "__main__":
             print("Encrypted:", encrypted_data)
             print("Decrypted:", decrypted_data)
         else:
-            print("Decryption failed.")
+            logging.error("Decryption failed.")
     else:
-        print("Encryption failed.")
+        logging.error("Encryption failed.")
