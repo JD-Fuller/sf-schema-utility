@@ -1,8 +1,10 @@
 import requests
 import json
-import os
-from sf_authentication import SfAuth, AuthConfig
-from credentials_manager import get_credentials
+import logging
+from auth_implementation import authenticate_using_username_password
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
 API_VERSION = '52.0'
 
@@ -18,28 +20,20 @@ def describe(sObjectName, api_version, token_data):
     return resp.json()
 
 def main():
-    creds = get_credentials()
-    if creds:
-        auth_config = AuthConfig(
-            client_id=creds.get('client_id'),
-            client_secret=creds.get('client_secret'),
-            username=creds.get('username'),
-            password=creds.get('password'),
-            security_token=creds.get('security_token'),
-            base_path=creds.get('base_path', 'https://login.salesforce.com')
-        )
+    # Manually specify the environment here
+    environment = 'dev'  # Change this as needed (e.g., 'dev', 'qa_uat', 'prod')
 
-        sf_auth = SfAuth()
-        token_data = sf_auth.get_session_id_conn_app(auth_config)
-        if 'access_token' in token_data:
-            # Example: Describe a specific Salesforce object
-            sObjectName = 'Account'  # Replace with the actual object name
-            describe_results = describe(sObjectName, API_VERSION, token_data)
-            # Process describe_results as needed
-        else:
-            print("Error: Salesforce authentication failed.")
-    else:
-        print("Error: Unable to retrieve or decrypt credentials.")
+    token_data = authenticate_using_username_password(environment)
+
+    if not token_data or 'access_token' not in token_data:
+        logging.error("Error: Salesforce authentication failed.")
+        return
+
+    # Example: Describe a specific Salesforce object
+    sObjectName = 'Account'  # Replace with the actual object name
+    describe_results = describe(sObjectName, API_VERSION, token_data)
+    # Process describe_results as needed
+    logging.info(f"Describe Results: {describe_results}")
 
 if __name__ == '__main__':
     main()
