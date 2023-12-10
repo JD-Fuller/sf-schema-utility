@@ -1,43 +1,34 @@
+import json
+import os
+import logging
 from sf_authentication import AuthConfig, SfAuth
-from credentials_manager import get_credentials
 
-def authenticate_using_username_password():
-    # Retrieve encrypted credentials
-    creds = get_credentials()
+# Function to load credentials from config.json
+def load_credentials(environment):
+    with open('config.json') as config_file:
+        config = json.load(config_file)
+        return config['client'][environment]
 
-    if creds:
-        # Extract credentials
-        username = creds.get('username')
-        password = creds.get('password')
-        security_token = creds.get('security_token')
-        base_path = creds.get('base_path', 'https://login.salesforce.com')  # Default to standard login URL
+# Logging configuration
+logging.basicConfig(level=logging.INFO)
 
-        if not all([username, password, security_token]):
-            print("Error: Missing required credentials.")
-            return
+def authenticate_using_username_password(environment):
+    creds = load_credentials(environment)
 
-        # Create a configuration object
-        config = AuthConfig(username, password, security_token, base_path)
+    if not all([creds.get('username'), creds.get('password'), creds.get('security_token')]):
+        logging.error("Error: Missing required credentials.")
+        return None
 
-        # Create an authentication object
-        sf_auth = SfAuth()
+    auth_config = AuthConfig(
+        username=creds.get('username'),
+        password=creds.get('password'),
+        security_token=creds.get('security_token'),
+        base_path=creds.get('base_path', 'https://login.salesforce.com')
+    )
 
-        # Get session ID using username and password
-        try:
-            session_id = sf_auth.get_session_id_un_pw(config)
-            print(f"Session ID: {session_id}")
-        except Exception as e:
-            print(f"Authentication failed: {e}")
-
-        # Uncomment the following lines if you want to authenticate using a connected app
-        # try:
-        #     session_info = sf_auth.get_session_id_conn_app(config)
-        #     print(f"Session Info: {session_info}")
-        # except Exception as e:
-        #     print(f"Connected App Authentication failed: {e}")
-
-    else:
-        print("Error: Unable to retrieve or decrypt credentials.")
-
-if __name__ == '__main__':
-    authenticate_using_username_password()
+    sf_auth = SfAuth()
+    try:
+        return sf_auth.get_session_id_conn_app(auth_config)
+    except Exception as e:
+        logging.error(f"Authentication failed: {e}")
+        return None
