@@ -140,3 +140,4 @@ cython_debug/
 # Project Specsific generated files
 .credentials.json
 .settings.json
+.config.json
