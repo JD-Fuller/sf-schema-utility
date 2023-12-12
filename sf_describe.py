@@ -1,8 +1,10 @@
+# sf_describe.py
+
 import argparse
 import logging
-from sf_authentication import authenticate_to_salesforce
 import menu
-import credential_utils  # Import the credential utility module
+import credential_utils
+from sf_describe_logic import get_available_objects, describe_object
 
 # Set up command-line argument parsing
 parser = argparse.ArgumentParser(description='Describe Salesforce Object')
@@ -11,20 +13,6 @@ parser.add_argument('-o', '--object', default='', help='Specify the Salesforce o
 
 # Logging configuration
 logging.basicConfig(level=logging.INFO)
-
-def get_available_objects(sf_instance):
-    try:
-        return sf_instance.describe()
-    except Exception as e:
-        logging.error(f"Error retrieving object list: {e}")
-        return None
-
-def describe_object(sObjectName, sf_instance):
-    try:
-        return sf_instance.sobjects[sObjectName].describe()
-    except Exception as e:
-        logging.error(f"Error describing {sObjectName}: {e}")
-        return None
 
 def main():
     menu.display_startup_menu()
@@ -40,11 +28,9 @@ def main():
         return
 
     if args.object:
-        # Describe the specified Salesforce object
         describe_results = describe_object(args.object, sf)
         logging.info(f"Describe Results for {args.object}: {describe_results}")
     else:
-        # List all available Salesforce objects
         available_objects = get_available_objects(sf)
         if available_objects:
             logging.info("Available Salesforce Objects:")

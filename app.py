@@ -1,7 +1,8 @@
+# app.py
+
 from flask import Flask, request, render_template
-# Import necessary modules for Salesforce integration
-from sf_authentication import authenticate_to_salesforce
-from sf_describe_logic import describe_salesforce_object  # Assuming this function exists
+from sf_describe_logic import get_available_objects, describe_object
+# Other necessary imports...
 
 app = Flask(__name__)
 
@@ -14,13 +15,12 @@ def describe():
     if request.method == 'POST':
         object_name = request.form.get('object_name')
         environment = request.form.get('environment')
-        sf = authenticate_to_salesforce(environment)
+        sf = authenticate_to_salesforce(environment)  # Ensure this function is properly imported
         if sf:
-            result = describe_salesforce_object(object_name, sf)
+            result = describe_object(object_name, sf)
             return render_template('describe_result.html', result=result)
         else:
-            error_message = "Salesforce authentication failed."
-            return render_template('describe_error.html', error=error_message)
+            return render_template('describe_error.html', error="Salesforce authentication failed.")
     else:
         return render_template('describe_form.html')
 
