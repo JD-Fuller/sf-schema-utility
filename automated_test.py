@@ -8,7 +8,7 @@ class TestEncryptionDecryption(unittest.TestCase):
         credentials = {
             "username": "jdfuller@resilient-bear-szma4m.com",
             "password": "Thisistheway1",
-            "security_token": "HuNkFTchD9rJ4891R36zLP4Je",
+            "security_token": "y5LGouo2qcquNLQWNoLOIYukC",
             "base_path": "https://login.salesforce.com"
         }
 
