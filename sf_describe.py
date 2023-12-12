@@ -1,45 +1,55 @@
-import requests
-import json
-import os
-from sf_authentication import SfAuth, AuthConfig
-from credentials_manager import get_credentials
+import argparse
+import logging
+from sf_authentication import authenticate_to_salesforce
+import menu
+import credential_utils  # Import the credential utility module
 
-API_VERSION = '52.0'
+# Set up command-line argument parsing
+parser = argparse.ArgumentParser(description='Describe Salesforce Object')
+parser.add_argument('-e', '--env', default='dev', choices=['dev', 'qa_uat', 'prod'], help='Specify the environment (default: dev)')
+parser.add_argument('-o', '--object', default='', help='Specify the Salesforce object to describe (default: lists all objects)')
 
-def describe(sObjectName, api_version, token_data):
-    base_path = token_data['instance_url']
-    resource_path = '/services/data/v' + api_version + '/sobjects/'
-    endpoint = base_path + resource_path + sObjectName + '/describe'
-    headers = {
-        'Authorization': token_data['token_type'] + ' ' + token_data['access_token']
-    }
+# Logging configuration
+logging.basicConfig(level=logging.INFO)
 
-    resp = requests.get(endpoint, headers=headers)
-    return resp.json()
+def get_available_objects(sf_instance):
+    try:
+        return sf_instance.describe()
+    except Exception as e:
+        logging.error(f"Error retrieving object list: {e}")
+        return None
+
+def describe_object(sObjectName, sf_instance):
+    try:
+        return sf_instance.sobjects[sObjectName].describe()
+    except Exception as e:
+        logging.error(f"Error describing {sObjectName}: {e}")
+        return None
 
 def main():
-    creds = get_credentials()
-    if creds:
-        auth_config = AuthConfig(
-            client_id=creds.get('client_id'),
-            client_secret=creds.get('client_secret'),
-            username=creds.get('username'),
-            password=creds.get('password'),
-            security_token=creds.get('security_token'),
-            base_path=creds.get('base_path', 'https://login.salesforce.com')
-        )
+    menu.display_startup_menu()
+    args = parser.parse_args()
+    sf = authenticate_to_salesforce(args.env)
 
-        sf_auth = SfAuth()
-        token_data = sf_auth.get_session_id_conn_app(auth_config)
-        if 'access_token' in token_data:
-            # Example: Describe a specific Salesforce object
-            sObjectName = 'Account'  # Replace with the actual object name
-            describe_results = describe(sObjectName, API_VERSION, token_data)
-            # Process describe_results as needed
-        else:
-            print("Error: Salesforce authentication failed.")
+    if sf is None:
+        creds = credential_utils.prompt_for_credentials()
+        sf = authenticate_to_salesforce(args.env, creds)
+
+    if sf is None:
+        logging.error("Error: Salesforce authentication failed.")
+        return
+
+    if args.object:
+        # Describe the specified Salesforce object
+        describe_results = describe_object(args.object, sf)
+        logging.info(f"Describe Results for {args.object}: {describe_results}")
     else:
-        print("Error: Unable to retrieve or decrypt credentials.")
+        # List all available Salesforce objects
+        available_objects = get_available_objects(sf)
+        if available_objects:
+            logging.info("Available Salesforce Objects:")
+            for obj in available_objects['sobjects']:
+                logging.info(f" - {obj['label']} ({obj['name']})")
 
 if __name__ == '__main__':
     main()
